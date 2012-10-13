@@ -1,5 +1,7 @@
 package com.github.etaoins.s5tool
 
+import java.io.File
+
 /** Abstract information needed to identify a file
   *
   * This is useful to perform comparisons between remote and local files 
@@ -10,6 +12,12 @@ sealed trait SiteFile {
   def contentEncoding : Option[String]
   def cacheControl : String
 }
+
+/** Local file that has been discovered but is unprocessed */
+case class LocalDirectoryEntry(
+  siteRelativePath : String,
+  file : File
+)
 
 /** Metadata and content of a local file eligible for uploading */
 case class LocalFile(

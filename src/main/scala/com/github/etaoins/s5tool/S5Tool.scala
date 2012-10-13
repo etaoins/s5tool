@@ -1,6 +1,7 @@
 package com.github.etaoins.s5tool
 
 import scopt.immutable._
+import java.io.File
 
 case class Config(
   filesystemRoot : String,
@@ -16,5 +17,7 @@ object S5Tool extends App {
   }
 
   parser.parse(args, Config("", "")) map { config =>
+    val localDirents = LocalDirectoryEnumerator(new File(config.filesystemRoot))
+    println(localDirents)
   }
 }
