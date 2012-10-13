@@ -18,6 +18,10 @@ object S5Tool extends App {
 
   parser.parse(args, Config("", "")) map { config =>
     val localDirents = LocalDirectoryEnumerator(new File(config.filesystemRoot))
-    println(localDirents)
+    val encodedFiles = localDirents.par.map(LocalFileEncoder(_)) 
+
+    for(encoded <- encodedFiles) {
+      println(encoded.siteRelativePath + ": " + encoded.contentEncoding.getOrElse("identity"))
+    }
   }
 }

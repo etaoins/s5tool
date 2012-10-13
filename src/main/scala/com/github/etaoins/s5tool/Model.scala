@@ -19,8 +19,15 @@ case class LocalDirectoryEntry(
   file : File
 )
 
+/** Local file that has had its body encoded */
+case class EncodedLocalFile(
+  siteRelativePath : String,
+  contentEncoding : Option[String],
+  body : Array[Byte]
+)
+
 /** Metadata and content of a local file eligible for uploading */
-case class LocalFile(
+case class UploadableLocalFile(
   siteRelativePath : String,
   contentMd5 : Array[Byte],
   contentEncoding : Option[String],
