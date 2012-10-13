@@ -32,6 +32,14 @@ case class EncodedLocalFile(
   body : Array[Byte]
 )
 
+/** Local file that has been hashed */
+case class HashedLocalFile(
+  siteRelativePath : String,
+  contentEncoding : Option[String],
+  contentMd5 : Array[Byte],
+  body : Array[Byte]
+)
+
 /** Metadata and content of a local file eligible for uploading */
 case class UploadableLocalFile(
   siteRelativePath : String,
