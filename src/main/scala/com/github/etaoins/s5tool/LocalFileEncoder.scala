@@ -17,32 +17,22 @@ object LocalFileEncoder {
     byteArrayOutputStream.toByteArray()
   }
 
-  private def fileToBytes(file : java.io.File) : Array[Byte] = {
-    val randomAccessFile = new RandomAccessFile(file, "r")
-    val readBuffer = new Array[Byte](randomAccessFile.length.toInt)
-    
-    randomAccessFile.read(readBuffer)
+  def apply(loadedFile : LoadedLocalFile) : EncodedLocalFile = {
+    val compressedData = gzipEncode(loadedFile.body)
 
-    return readBuffer
-  }
-
-  def apply(dirEntry : LocalDirectoryEntry) : EncodedLocalFile = {
-    val uncompressedData = fileToBytes(dirEntry.file)
-    val compressedData = gzipEncode(uncompressedData)
-
-    if ((uncompressedData.length - compressedData.length) > gzipOverheadBytes) {
+    if ((loadedFile.body.length - compressedData.length) > gzipOverheadBytes) {
       // Compressed wins!
       EncodedLocalFile(
-        siteRelativePath = dirEntry.siteRelativePath,
+        siteRelativePath = loadedFile.siteRelativePath,
         contentEncoding = Some("gzip"),
         body = compressedData
       )
     }
     else {
       EncodedLocalFile(
-        siteRelativePath = dirEntry.siteRelativePath,
+        siteRelativePath = loadedFile.siteRelativePath,
         contentEncoding = None,
-        body = uncompressedData
+        body = loadedFile.body
       )
     }
   }

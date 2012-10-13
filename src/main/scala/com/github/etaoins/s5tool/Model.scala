@@ -19,6 +19,12 @@ case class LocalDirectoryEntry(
   file : File
 )
 
+/** Local file that has been loaded from disk */
+case class LoadedLocalFile(
+  siteRelativePath : String,
+  body : Array[Byte]
+)
+
 /** Local file that has had its body encoded */
 case class EncodedLocalFile(
   siteRelativePath : String,
