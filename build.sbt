@@ -11,3 +11,5 @@ libraryDependencies += "com.github.scopt" %% "scopt" % "2.1.0"
 libraryDependencies += "com.typesafe.akka" % "akka-actor" % "2.0.3"
       
 libraryDependencies += "com.amazonaws" % "aws-java-sdk" % "1.3.14"
+
+libraryDependencies += "org.ini4j" % "ini4j" % "0.5.2"
