@@ -2,28 +2,33 @@ package com.github.etaoins.s5tool
 
 import java.io.File
 import com.amazonaws.auth.AWSCredentials
+import akka.dispatch.{Future,Await}
+import akka.util.duration._
 
 object SiteSynchronizer {
-  private def printFileInfo(file : SiteFile) {
-    val hexMd5 = file.contentMd5.map("%02x" format _).mkString
-    println(file.siteRelativePath + ": " + hexMd5 + " (" + file.contentEncoding.getOrElse("identity") + ")")
-  }
-
   def apply(config : Config, awsCredentials : AWSCredentials) = {
-    val targetState = TargetStateCalculator(config)
-
-    println("Current local:")
-    // Print everything out for debugging
-    for((_, file) <- targetState) {
-      printFileInfo(file)
-    }
+    implicit val executeContext = FixedExecutionContext(6)
     
-    println()
-    println("Current remote:")
-    val remoteState = RemoteStateCalculator(awsCredentials)(config.bucketName)
-    for((_, file) <- remoteState) {
-      printFileInfo(file)
+    // Get our target and remote state concurrently
+    val targetStateFuture = Future {
+      TargetStateCalculator(config)
     }
+
+    val remoteStateFuture = Future {
+      RemoteStateCalculator(awsCredentials)(config.bucketName)
+    }
+
+   val targetState = Await.result(targetStateFuture, 1 day)
+   val remoteState = Await.result(remoteStateFuture, 1 day)
+
+    // Calculate the files to delete - this is easy
+    val toDelete = remoteState.keys.toSet -- targetState.keys.toSet
+
+    val toUpload = targetState.filter { case (relativePath, file) =>
+      remoteState.get(relativePath).map(_.sameContentAs(file)).getOrElse(true)
+    }
+      
+    executeContext.shutdown();
   }
 }
 

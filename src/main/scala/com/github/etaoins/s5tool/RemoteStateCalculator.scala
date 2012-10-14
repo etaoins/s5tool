@@ -13,9 +13,7 @@ import akka.util.duration._
 object RemoteStateCalculator {
   def apply(credentials : AWSCredentials)(bucketName : String) : Map[String, RemoteFile] = {
     /** Execution context for HTTP operations */
-    implicit val httpContext = ExecutionContext.fromExecutorService(
-      Executors.newFixedThreadPool(6)
-    )
+    implicit val httpContext = FixedExecutionContext(6)
 
     // Get the raw S3 data
     val s3Client = new AmazonS3Client(credentials)

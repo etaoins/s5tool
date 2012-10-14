@@ -12,9 +12,7 @@ object TargetStateCalculator {
     val cacheControlHeader = config.maxAge.map( "max-age=" + _.toString)
 
     /** Execution context for I/O-bound tasks */
-    val ioContext = ExecutionContext.fromExecutorService(
-      Executors.newFixedThreadPool(4)
-    )
+    val ioContext = FixedExecutionContext(4)
 
     /** Execution context for CPU-bound tasks */
     val computeContext = ExecutionContext.fromExecutorService(
