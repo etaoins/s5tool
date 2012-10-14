@@ -11,6 +11,13 @@ sealed trait SiteFile {
   def contentMd5 : Array[Byte]
   def contentEncoding : Option[String]
   def cacheControl : String
+
+  def sameContentAs(that : SiteFile) : Boolean = {
+    (this.siteRelativePath == that.siteRelativePath) &&
+    (this.contentMd5.toSeq == that.contentMd5.toSeq) &&
+    (this.contentEncoding == that.contentEncoding) &&
+    (this.cacheControl == that.cacheControl)
+  }
 }
 
 /** Local file that has been discovered but is unprocessed */
