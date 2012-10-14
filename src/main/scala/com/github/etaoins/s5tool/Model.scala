@@ -10,7 +10,7 @@ sealed trait SiteFile {
   def siteRelativePath : String
   def contentMd5 : Array[Byte]
   def contentEncoding : Option[String]
-  def cacheControl : String
+  def cacheControl : Option[String]
 
   def sameContentAs(that : SiteFile) : Boolean = {
     (this.siteRelativePath == that.siteRelativePath) &&
@@ -52,7 +52,7 @@ case class UploadableLocalFile(
   siteRelativePath : String,
   contentMd5 : Array[Byte],
   contentEncoding : Option[String],
-  cacheControl : String,
+  cacheControl : Option[String],
   body : Array[Byte]
 ) extends SiteFile
 
@@ -61,5 +61,5 @@ case class RemoteFile(
   siteRelativePath : String,
   contentMd5 : Array[Byte],
   contentEncoding : Option[String],
-  cacheControl : String
+  cacheControl : Option[String]
 ) extends SiteFile

@@ -9,7 +9,7 @@ import akka.dispatch.Await
 object TargetStateCalculator {
   def apply(config : Config) : Map[String,UploadableLocalFile] = {
     /** Our fixed Cache-Control header */
-    val cacheControlHeader = "max-age=" + config.maxAge.toString
+    val cacheControlHeader = config.maxAge.map( "max-age=" + _.toString)
 
     /** Execution context for I/O-bound tasks */
     val ioContext = ExecutionContext.fromExecutorService(

@@ -8,14 +8,14 @@ import com.amazonaws.auth.BasicAWSCredentials
 object S5Tool extends App {
   val parser = new OptionParser[Config]("s5tool", "0.0,1") {
     def options = Seq(
-      intOpt("m", "max-age", "maximum time in seconds to allow HTTP clients to cache site files. Defaults to 300") { (v: Int, c: Config) => c.copy(maxAge = v) },
+      intOpt("m", "max-age", "maximum time in seconds to allow HTTP clients to cache site files") { (v: Int, c: Config) => c.copy(maxAge = Some(v)) },
       arg("<source>", "source directory") { (v: String, c: Config) => c.copy(filesystemRoot = v) },
       arg("<bucket>", "S3 bucket name") { (v: String, c: Config) => c.copy(bucketName = v) }
     )
   }
 
   // Parse our arguments first
-  parser.parse(args, Config("", "", 300)) map { config =>
+  parser.parse(args, Config("", "", None)) map { config =>
     // Now read .s3cfg
     val homeDir = System.getProperty("user.home")
 

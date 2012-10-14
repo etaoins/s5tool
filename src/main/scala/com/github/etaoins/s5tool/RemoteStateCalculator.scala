@@ -29,7 +29,7 @@ object RemoteStateCalculator {
           siteRelativePath=summary.getKey(),
           contentMd5=metadata.getETag().sliding(2, 2).toArray.map(Integer.parseInt(_, 16).toByte),
           contentEncoding=Option(metadata.getContentEncoding()),
-          cacheControl=metadata.getCacheControl()
+          cacheControl=Option(metadata.getCacheControl())
         )
       }
     }
