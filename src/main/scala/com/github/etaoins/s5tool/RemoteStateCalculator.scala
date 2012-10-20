@@ -2,7 +2,6 @@ package com.github.etaoins.s5tool
 
 import scala.collection.JavaConversions._
 
-import com.amazonaws.auth.AWSCredentials
 import com.amazonaws.services.s3.AmazonS3Client
 import com.amazonaws.services.s3.model.{S3ObjectSummary,ObjectMetadata}
 
@@ -11,12 +10,11 @@ import akka.dispatch.{ExecutionContext,Future,Await}
 import akka.util.duration._
 
 object RemoteStateCalculator {
-  def apply(credentials : AWSCredentials)(bucketName : String) : Map[String, RemoteFile] = {
+  def apply(s3Client : AmazonS3Client)(bucketName : String) : Map[String, RemoteFile] = {
     /** Execution context for HTTP operations */
     implicit val httpContext = FixedExecutionContext(6)
 
     // Get the raw S3 data
-    val s3Client = new AmazonS3Client(credentials)
     val objectSummaries = s3Client.listObjects(bucketName).getObjectSummaries()
 
     val remoteFileFutures = objectSummaries.map { summary =>
