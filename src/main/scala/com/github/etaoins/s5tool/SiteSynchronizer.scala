@@ -29,16 +29,11 @@ object SiteSynchronizer {
       RemoteStateCalculator(s3Client)(config.bucketName)
     }
 
-   val targetState = Await.result(targetStateFuture, 1 day)
-   val remoteState = Await.result(remoteStateFuture, 1 day)
+    val targetState = Await.result(targetStateFuture, 1 day)
+    val remoteState = Await.result(remoteStateFuture, 1 day)
 
-    // Calculate the files to delete - this is easy
-    val deleteFutures = (remoteState.keys.toSet -- targetState.keys.toSet).map { key =>
-      println("Deleting " + key)
-      s3Client.deleteObject(config.bucketName, key)
-    }
-
-    val uploadFutures = targetState.filter { case (relativePath, file) =>
+    // Upload any new or changed files
+    targetState.filter { case (relativePath, file) =>
       remoteState.get(relativePath).map(!_.sameContentAs(file)).getOrElse(true)
     }.map { case (key, file) =>
       val metadata = new ObjectMetadata
@@ -63,6 +58,12 @@ object SiteSynchronizer {
       val istream = new ByteArrayInputStream(file.body)
       s3Client.putObject(config.bucketName, key, istream, metadata)
     } 
+    
+    // Delete any extra files
+    (remoteState.keys.toSet -- targetState.keys.toSet).map { key =>
+      println("Deleting " + key)
+      s3Client.deleteObject(config.bucketName, key)
+    }
       
     executeContext.shutdown();
   }
