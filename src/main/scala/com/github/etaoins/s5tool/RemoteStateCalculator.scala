@@ -6,8 +6,8 @@ import com.amazonaws.services.s3.AmazonS3Client
 import com.amazonaws.services.s3.model.{S3ObjectSummary,ObjectMetadata}
 
 import java.util.concurrent.Executors
-import akka.dispatch.{ExecutionContext,Future,Await}
-import akka.util.duration._
+import scala.concurrent.{ExecutionContext,Future,Await}
+import scala.concurrent.duration.Duration
 
 object RemoteStateCalculator {
   def apply(s3Client : AmazonS3Client)(bucketName : String) : Map[String, RemoteFile] = {
@@ -32,7 +32,7 @@ object RemoteStateCalculator {
 
     // Await, convert to map
     val remoteState = remoteFileFutures.map { remoteFileFuture => 
-      val remoteFile = Await.result(remoteFileFuture, 1 day)
+      val remoteFile = Await.result(remoteFileFuture, Duration.Inf)
 
       (remoteFile.siteRelativePath, remoteFile)
     }.toMap

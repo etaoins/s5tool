@@ -1,8 +1,10 @@
 package com.github.etaoins.s5tool
 
+import java.io.File
+
 case class Config(
-  filesystemRoot : String,
-  bucketName : String,
-  maxAge : Option[Int]
+  filesystemRoot : Option[File] = None,
+  bucketName : String = "",
+  maxAge : Option[Int] = None
 )
 

@@ -1,21 +1,26 @@
 package com.github.etaoins.s5tool
 
-import scopt.immutable._
 import java.io.{File,FileNotFoundException}
 import org.ini4j.Wini
 import com.amazonaws.auth.BasicAWSCredentials
 
 object S5Tool extends App {
-  val parser = new OptionParser[Config]("s5tool", "0.0,1") {
-    def options = Seq(
-      intOpt("m", "max-age", "maximum time in seconds to allow HTTP clients to cache site files") { (v: Int, c: Config) => c.copy(maxAge = Some(v)) },
-      arg("<source>", "source directory") { (v: String, c: Config) => c.copy(filesystemRoot = v) },
-      arg("<bucket>", "S3 bucket name") { (v: String, c: Config) => c.copy(bucketName = v) }
-    )
+  val parser = new scopt.OptionParser[Config]("s5tool") {
+    opt[Int]('m', "max-age") action { (v, c) =>
+      c.copy(maxAge = Some(v))
+    } text("maximum time in seconds to allow HTTP clients to cache site files")
+
+    arg[File]("source") action { (path, c) =>
+      c.copy(filesystemRoot=Some(path))
+    } text("source directory")
+
+    arg[String]("bucket") action { (v, c) =>
+      c.copy(bucketName = v)
+    } text("S3 bucket name")
   }
 
   // Parse our arguments first
-  parser.parse(args, Config("", "", None)) map { config =>
+  parser.parse(args, Config()) map { config =>
     // Now read .s3cfg
     val homeDir = System.getProperty("user.home")
 

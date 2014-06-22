@@ -2,36 +2,32 @@ package com.github.etaoins.s5tool
 
 import java.io.File
 import java.util.concurrent.{Executors,ForkJoinPool}
-import akka.dispatch.{ExecutionContext,Future}
-import akka.util.duration._
-import akka.dispatch.Await
+import scala.concurrent.{ExecutionContext,Future,Await}
+import scala.concurrent.duration._
 
 object TargetStateCalculator {
   def apply(config : Config) : Map[String,UploadableLocalFile] = {
     /** Our fixed Cache-Control header */
     val cacheControlHeader = config.maxAge.map( "max-age=" + _.toString)
 
-    /** Execution context for I/O-bound tasks */
-    val ioContext = FixedExecutionContext(4)
-
     /** Execution context for CPU-bound tasks */
-    val computeContext = ExecutionContext.fromExecutorService(
+    implicit val executeContext = ExecutionContext.fromExecutorService(
       new ForkJoinPool 
     )
 
-    val localDirEnts = LocalDirectoryEnumerator(new File(config.filesystemRoot))
+    val localDirEnts = LocalDirectoryEnumerator(config.filesystemRoot.get)
 
     val hashedFutures = localDirEnts.map { dirEnt =>
       for {
-        read <- Future(LocalFileReader(dirEnt))(ioContext)
-        encoded <- Future(LocalFileEncoder(read))(computeContext)
-        hashed <- Future(LocalFileHasher(encoded))(computeContext)
+        read <- Future(LocalFileReader(dirEnt))
+        encoded <- Future(LocalFileEncoder(read))
+        hashed <- Future(LocalFileHasher(encoded))
       } yield hashed
     }
 
     // Wait for everything to finish and turn in to an UploadableLocalFile
     val uploadableFiles = hashedFutures.map { hashedFuture =>
-      val hashed = Await.result(hashedFuture, 1 day)
+      val hashed = Await.result(hashedFuture, Duration.Inf)
 
       UploadableLocalFile(
         siteRelativePath=hashed.siteRelativePath,
@@ -43,8 +39,7 @@ object TargetStateCalculator {
     }
 
     // Shut. Everything. Down.
-    ioContext.shutdown()
-    computeContext.shutdown()
+    executeContext.shutdown()
 
     // Return a map
     uploadableFiles.map { uploadable => 

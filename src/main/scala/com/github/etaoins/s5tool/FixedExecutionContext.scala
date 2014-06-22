@@ -1,7 +1,7 @@
 package com.github.etaoins.s5tool
 
 import java.util.concurrent.Executors
-import akka.dispatch.ExecutionContext
+import scala.concurrent.ExecutionContext
 
 object FixedExecutionContext {
   def apply(poolSize : Int) = {

@@ -2,8 +2,8 @@ package com.github.etaoins.s5tool
 
 import java.io.File
 import java.io.ByteArrayInputStream
-import akka.dispatch.{Future,Await}
-import akka.util.duration._
+import scala.concurrent.{Future,Await}
+import scala.concurrent.duration.Duration
 
 import java.net.FileNameMap
 import java.net.URLConnection
@@ -29,8 +29,8 @@ object SiteSynchronizer {
       RemoteStateCalculator(s3Client)(config.bucketName)
     }
 
-    val targetState = Await.result(targetStateFuture, 1 day)
-    val remoteState = Await.result(remoteStateFuture, 1 day)
+    val targetState = Await.result(targetStateFuture, Duration.Inf)
+    val remoteState = Await.result(remoteStateFuture, Duration.Inf)
 
     // Upload any new or changed files
     targetState.filter { case (relativePath, file) =>
